@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            font-family: 'Orbitron', monospace;
+        }
+        
+        body {
+            background: #0a0a0a;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 255, 0.03) 2px,
+                    rgba(0, 255, 255, 0.03) 4px
+                );
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        body > * {
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Smooth transitions for all interactive elements */
+        button {
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-1px);
+        }
+        
+        /* Cyberpunk glassmorphism style */
+        .glassmorphism {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.2),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+        
+        /* Cyberpunk card style */
+        .cyber-card {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.3),
+                inset 0 0 20px rgba(0, 255, 255, 0.05);
+        }
+        
+        /* Neon glow effects */
+        .neon-cyan {
+            color: #00ffff;
+            text-shadow: 
+                0 0 5px #00ffff,
+                0 0 10px #00ffff,
+                0 0 15px #00ffff,
+                0 0 20px #00ffff;
+        }
+        
+        .neon-magenta {
+            color: #ff00ff;
+            text-shadow: 
+                0 0 5px #ff00ff,
+                0 0 10px #ff00ff,
+                0 0 15px #ff00ff;
+        }
+        
+        .neon-blue {
+            color: #0080ff;
+            text-shadow: 
+                0 0 5px #0080ff,
+                0 0 10px #0080ff;
+        }
+        
+        /* Button glow effects */
+        .btn-cyan {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            box-shadow: 
+                0 0 10px rgba(0, 255, 255, 0.5),
+                inset 0 0 10px rgba(0, 255, 255, 0.1);
+        }
+        
+        .btn-cyan:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.8),
+                inset 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+        
+        .btn-magenta {
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid #ff00ff;
+            color: #ff00ff;
+            box-shadow: 
+                0 0 10px rgba(255, 0, 255, 0.5),
+                inset 0 0 10px rgba(255, 0, 255, 0.1);
+        }
+        
+        .btn-magenta:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 
+                0 0 20px rgba(255, 0, 255, 0.8),
+                inset 0 0 20px rgba(255, 0, 255, 0.2);
+        }
+        
+        .btn-red {
+            background: rgba(255, 0, 100, 0.1);
+            border: 1px solid #ff0066;
+            color: #ff0066;
+            box-shadow: 
+                0 0 10px rgba(255, 0, 100, 0.5),
+                inset 0 0 10px rgba(255, 0, 100, 0.1);
+        }
+        
+        .btn-red:hover {
+            background: rgba(255, 0, 100, 0.2);
+            box-shadow: 
+                0 0 20px rgba(255, 0, 100, 0.8),
+                inset 0 0 20px rgba(255, 0, 100, 0.2);
+        }
+        
+        /* Input fields */
+        .cyber-input {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.1);
+        }
+        
+        .cyber-input:focus {
+            border-color: #00ffff;
+            box-shadow: 
+                inset 0 0 10px rgba(0, 255, 255, 0.2),
+                0 0 15px rgba(0, 255, 255, 0.5);
+            outline: none;
+        }
+        
+        .cyber-input::placeholder {
+            color: rgba(0, 255, 255, 0.5);
+        }
+        
+        /* Pulsing animation for microphone button */
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 0, 100, 0.7);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 15px rgba(255, 0, 100, 0);
+            }
+        }
+        
+        .mic-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Glitch effect */
+        @keyframes glitch {
+            0%, 100% {
+                text-shadow: 
+                    2px 0 #00ffff,
+                    -2px 0 #ff00ff;
+            }
+            25% {
+                text-shadow: 
+                    -2px 0 #00ffff,
+                    2px 0 #ff00ff;
+            }
+            50% {
+                text-shadow: 
+                    2px 0 #ff00ff,
+                    -2px 0 #00ffff;
+            }
+            75% {
+                text-shadow: 
+                    -2px 0 #ff00ff,
+                    2px 0 #00ffff;
+            }
+        }
+        
+        .glitch-text {
+            animation: glitch 3s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen py-8">
+    <div class="max-w-2xl mx-auto px-4">
+        <div class="flex items-center justify-between mb-8">
+            <h1 class="text-4xl font-bold neon-cyan glitch-text">TASK DASHBOARD</h1>
+            <!-- Voice Assistant Button -->
+            <button 
+                id="voiceAssistantBtn" 
+                class="w-16 h-16 btn-cyan rounded-full font-bold flex items-center justify-center relative"
+                title="Click to start voice assistant"
+            >
+                <svg id="micIcon" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                </svg>
+                <span id="voiceStatus" class="absolute -bottom-8 text-xs neon-cyan whitespace-nowrap" style="display: none;">LISTENING...</span>
+            </button>
+        </div>
+        
+        <!-- Weather Widget Section -->
+        <div class="glassmorphism rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-bold neon-cyan mb-4">WEATHER</h2>
+            <div class="mb-4">
+                <div class="flex gap-2 mb-2">
+                    <input 
+                        type="text" 
+                        id="cityInput" 
+                        placeholder="Enter city name..." 
+                        class="flex-1 px-4 py-2 cyber-input rounded-lg"
+                    >
+                    <button 
+                        id="searchCityBtn" 
+                        class="px-6 py-2 btn-cyan rounded-lg font-bold"
+                    >
+                        SEARCH
+                    </button>
+                    <button 
+                        id="detectLocationBtn" 
+                        class="px-6 py-2 btn-cyan rounded-lg font-bold"
+                    >
+                        LOCATE
+                    </button>
+                </div>
+                <div class="text-sm mb-2">
+                    <label class="flex items-center gap-2">
+                        <input 
+                            type="text" 
+                            id="apiKeyInput" 
+                            placeholder="OpenWeatherMap API Key (optional)" 
+                            class="flex-1 px-3 py-1 cyber-input rounded-lg text-sm"
+                        >
+                        <button 
+                            id="saveApiKeyBtn" 
+                            class="px-4 py-1 btn-cyan rounded-lg font-bold text-sm"
+                        >
+                            SAVE
+                        </button>
+                    </label>
+                </div>
+            </div>
+            <div id="weatherDisplay" class="neon-cyan">
+                <div id="weatherLoading" class="text-center py-4" style="display: none;">
+                    LOADING...
+                </div>
+                <div id="weatherContent" style="display: none;">
+                    <div class="flex items-center gap-4">
+                        <div class="text-5xl" id="weatherEmoji"></div>
+                        <div>
+                            <div class="text-2xl font-bold" id="weatherLocation"></div>
+                            <div class="text-xl" id="weatherTemp"></div>
+                            <div class="text-sm" id="weatherHumidity"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="weatherError" class="text-red-400 text-center py-4" style="display: none; text-shadow: 0 0 10px rgba(255, 0, 100, 0.8);"></div>
+            </div>
+        </div>
+        
+        <!-- Add Task Section -->
+        <div class="cyber-card rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-bold neon-cyan mb-4">ADD NEW TASK</h2>
+            <div class="flex gap-2">
+                <input 
+                    type="text" 
+                    id="taskInput" 
+                    placeholder="Enter a new task..." 
+                    class="flex-1 px-4 py-2 cyber-input rounded-lg"
+                >
+                <button 
+                    id="addTaskBtn" 
+                    class="px-6 py-2 btn-cyan rounded-lg font-bold"
+                >
+                    ADD
+                </button>
+            </div>
+        </div>
+
+        <!-- Tasks List Section -->
+        <div class="cyber-card rounded-lg p-6">
+            <h2 class="text-xl font-bold neon-cyan mb-4">YOUR TASKS</h2>
+            <div id="tasksList" class="space-y-2">
+                <!-- Tasks will be dynamically inserted here -->
+            </div>
+            <div id="emptyState" class="text-center neon-cyan py-8 opacity-60">
+                NO TASKS YET. ADD ONE ABOVE TO GET STARTED!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const taskInput = document.getElementById('taskInput');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const tasksList = document.getElementById('tasksList');
+        const emptyState = document.getElementById('emptyState');
+        
+        // Voice assistant elements
+        const voiceAssistantBtn = document.getElementById('voiceAssistantBtn');
+        const micIcon = document.getElementById('micIcon');
+        const voiceStatus = document.getElementById('voiceStatus');
+        
+        // Voice recognition setup
+        let recognition = null;
+        let isListening = false;
+        
+        // Check if browser supports Web Speech API
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+            
+            recognition.onstart = () => {
+                isListening = true;
+                voiceAssistantBtn.classList.add('mic-pulse');
+                voiceAssistantBtn.classList.remove('btn-cyan');
+                voiceAssistantBtn.classList.add('btn-red');
+                voiceStatus.style.display = 'block';
+                voiceStatus.textContent = 'LISTENING...';
+            };
+            
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.toLowerCase().trim();
+                handleVoiceCommand(transcript);
+            };
+            
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                speak('Sorry, I did not understand that. Please try again.');
+                stopListening();
+            };
+            
+            recognition.onend = () => {
+                stopListening();
+            };
+        } else {
+            voiceAssistantBtn.disabled = true;
+            voiceAssistantBtn.title = 'Voice recognition not supported in this browser';
+            voiceAssistantBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+        
+        // Text-to-speech function
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+        
+        // Handle voice commands
+        function handleVoiceCommand(transcript) {
+            console.log('Heard:', transcript);
+            
+            // Check for "Add task" command (handles variations like "add task", "add a task", "create task")
+            const addTaskMatch = transcript.match(/(?:add|create)(?:\s+a)?\s+task\s+(.+)/i);
+            if (addTaskMatch) {
+                const taskName = addTaskMatch[1].trim();
+                speak(`Okay, adding ${taskName} to your list`);
+                // Add a small delay before executing to let the speech finish
+                setTimeout(() => {
+                    addTaskByVoice(taskName);
+                }, 500);
+                return;
+            }
+            
+            // Check for "Delete task" command (handles variations like "delete task", "remove task")
+            const deleteTaskMatch = transcript.match(/(?:delete|remove)(?:\s+a)?\s+task\s+(.+)/i);
+            if (deleteTaskMatch) {
+                const taskName = deleteTaskMatch[1].trim();
+                const deleted = deleteTaskByVoice(taskName);
+                if (deleted) {
+                    speak(`Okay, I deleted the task ${taskName}`);
+                } else {
+                    speak(`Sorry, I could not find a task matching ${taskName}`);
+                }
+                return;
+            }
+            
+            // Check for "What is the weather" command (handles various phrasings)
+            const weatherPhrases = [
+                'what is the weather',
+                'what\'s the weather',
+                'show me the weather',
+                'get the weather',
+                'weather please',
+                'tell me the weather'
+            ];
+            if (weatherPhrases.some(phrase => transcript.includes(phrase))) {
+                speak('Okay, fetching the weather for you');
+                setTimeout(() => {
+                    triggerWeather();
+                }, 500);
+                return;
+            }
+            
+            // Unknown command
+            speak('I did not understand that command. You can say "Add task" followed by a task name, "Delete task" followed by a task name, or "What is the weather"');
+        }
+        
+        // Add task via voice
+        function addTaskByVoice(taskName) {
+            if (taskName) {
+                tasks.push({ text: taskName, completed: false });
+                saveTasks();
+                renderTasks();
+            }
+        }
+        
+        // Delete task via voice (finds task by name, case-insensitive partial match)
+        function deleteTaskByVoice(taskName) {
+            if (!taskName || tasks.length === 0) {
+                return false;
+            }
+            
+            // Try exact match first (case-insensitive)
+            let taskIndex = tasks.findIndex(task => 
+                task.text.toLowerCase() === taskName.toLowerCase()
+            );
+            
+            // If no exact match, try partial match
+            if (taskIndex === -1) {
+                taskIndex = tasks.findIndex(task => 
+                    task.text.toLowerCase().includes(taskName.toLowerCase()) ||
+                    taskName.toLowerCase().includes(task.text.toLowerCase())
+                );
+            }
+            
+            if (taskIndex !== -1) {
+                tasks.splice(taskIndex, 1);
+                saveTasks();
+                renderTasks();
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // Trigger weather fetch
+        function triggerWeather() {
+            const apiKey = localStorage.getItem('openweather_api_key');
+            if (apiKey) {
+                detectLocation();
+            } else {
+                speak('Please set up your weather API key first');
+            }
+        }
+        
+        // Start listening
+        function startListening() {
+            if (recognition && !isListening) {
+                try {
+                    recognition.start();
+                } catch (error) {
+                    console.error('Error starting recognition:', error);
+                    speak('Sorry, I could not start listening. Please try again.');
+                }
+            }
+        }
+        
+        // Stop listening
+        function stopListening() {
+            isListening = false;
+            voiceAssistantBtn.classList.remove('mic-pulse', 'btn-red');
+            voiceAssistantBtn.classList.add('btn-cyan');
+            voiceStatus.style.display = 'none';
+            if (recognition) {
+                recognition.stop();
+            }
+        }
+        
+        // Voice assistant button click handler
+        voiceAssistantBtn.addEventListener('click', () => {
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        });
+        
+        // Weather widget elements
+        const cityInput = document.getElementById('cityInput');
+        const searchCityBtn = document.getElementById('searchCityBtn');
+        const detectLocationBtn = document.getElementById('detectLocationBtn');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+        const weatherLoading = document.getElementById('weatherLoading');
+        const weatherContent = document.getElementById('weatherContent');
+        const weatherError = document.getElementById('weatherError');
+        const weatherEmoji = document.getElementById('weatherEmoji');
+        const weatherLocation = document.getElementById('weatherLocation');
+        const weatherTemp = document.getElementById('weatherTemp');
+        const weatherHumidity = document.getElementById('weatherHumidity');
+        
+        // Load API key from localStorage
+        const apiKey = localStorage.getItem('openweather_api_key') || '';
+        if (apiKey) {
+            apiKeyInput.value = apiKey;
+        }
+
+        // Load tasks from localStorage on page load
+        // Migrate old format (array of strings) to new format (array of objects)
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        if (tasks.length > 0 && typeof tasks[0] === 'string') {
+            // Migrate old format
+            tasks = tasks.map(text => ({ text, completed: false }));
+            saveTasks();
+        }
+
+        // Render tasks
+        function renderTasks() {
+            tasksList.innerHTML = '';
+            
+            if (tasks.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            tasks.forEach((task, index) => {
+                const taskItem = document.createElement('div');
+                taskItem.className = 'flex items-center gap-3 p-3 bg-black/40 border border-cyan-500/30 rounded-lg hover:border-cyan-500/60 transition-all';
+                taskItem.style.boxShadow = '0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.05)';
+                
+                // Checkbox for completion
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'w-5 h-5 rounded cursor-pointer accent-cyan-500';
+                checkbox.style.accentColor = '#00ffff';
+                checkbox.checked = task.completed;
+                checkbox.addEventListener('change', () => {
+                    toggleTask(index);
+                });
+                
+                // Task text (editable)
+                const taskText = document.createElement('span');
+                const completedStyle = task.completed ? 'line-through opacity-50' : '';
+                taskText.className = `flex-1 neon-cyan cursor-pointer ${completedStyle}`;
+                taskText.textContent = task.text;
+                taskText.addEventListener('click', () => {
+                    editTask(index, taskText);
+                });
+                
+                // Buttons container
+                const buttonsContainer = document.createElement('div');
+                buttonsContainer.className = 'flex gap-2';
+                
+                // Edit button
+                const editBtn = document.createElement('button');
+                editBtn.className = 'px-4 py-1 btn-cyan rounded-lg font-bold edit-btn';
+                editBtn.textContent = 'EDIT';
+                editBtn.setAttribute('data-index', index);
+                editBtn.addEventListener('click', () => {
+                    editTask(index, taskText);
+                });
+                
+                // Delete button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'px-4 py-1 btn-red rounded-lg font-bold delete-btn';
+                deleteBtn.textContent = 'DELETE';
+                deleteBtn.setAttribute('data-index', index);
+                deleteBtn.addEventListener('click', () => {
+                    deleteTask(index);
+                });
+                
+                buttonsContainer.appendChild(editBtn);
+                buttonsContainer.appendChild(deleteBtn);
+                
+                taskItem.appendChild(checkbox);
+                taskItem.appendChild(taskText);
+                taskItem.appendChild(buttonsContainer);
+                tasksList.appendChild(taskItem);
+            });
+        }
+
+        // Add task
+        function addTask() {
+            const taskText = taskInput.value.trim();
+            if (taskText === '') {
+                return;
+            }
+            
+            tasks.push({ text: taskText, completed: false });
+            saveTasks();
+            taskInput.value = '';
+            renderTasks();
+        }
+
+        // Toggle task completion
+        function toggleTask(index) {
+            tasks[index].completed = !tasks[index].completed;
+            saveTasks();
+            renderTasks();
+        }
+
+        // Edit task
+        function editTask(index, taskTextElement) {
+            const currentText = tasks[index].text;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentText;
+            input.className = 'flex-1 px-2 py-1 cyber-input rounded-lg';
+            
+            const saveEdit = () => {
+                const newText = input.value.trim();
+                if (newText !== '' && newText !== currentText) {
+                    tasks[index].text = newText;
+                    saveTasks();
+                }
+                renderTasks();
+            };
+            
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    input.blur();
+                } else if (e.key === 'Escape') {
+                    renderTasks();
+                }
+            });
+            
+            taskTextElement.replaceWith(input);
+            input.focus();
+            input.select();
+        }
+
+        // Delete task
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            saveTasks();
+            renderTasks();
+        }
+
+        // Save tasks to localStorage
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Weather functions
+        function getWeatherEmoji(weatherMain) {
+            const emojiMap = {
+                'Clear': '☀️',
+                'Clouds': '☁️',
+                'Rain': '🌧️',
+                'Drizzle': '🌦️',
+                'Thunderstorm': '⛈️',
+                'Snow': '❄️',
+                'Mist': '🌫️',
+                'Fog': '🌫️',
+                'Haze': '🌫️'
+            };
+            return emojiMap[weatherMain] || '🌤️';
+        }
+        
+        function fetchWeatherByCity(city) {
+            const apiKey = localStorage.getItem('openweather_api_key');
+            if (!apiKey) {
+                showWeatherError('Please enter your OpenWeatherMap API key. Get one free at https://openweathermap.org/api');
+                return;
+            }
+            
+            showWeatherLoading();
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`;
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            throw new Error('Invalid API key. Please check your OpenWeatherMap API key.');
+                        } else if (response.status === 404) {
+                            throw new Error('City not found. Please check the city name.');
+                        }
+                        throw new Error('Failed to fetch weather data');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayWeather(data);
+                })
+                .catch(error => {
+                    showWeatherError(error.message);
+                });
+        }
+        
+        function fetchWeatherByCoords(lat, lon) {
+            const apiKey = localStorage.getItem('openweather_api_key');
+            if (!apiKey) {
+                showWeatherError('Please enter your OpenWeatherMap API key. Get one free at https://openweathermap.org/api');
+                return;
+            }
+            
+            showWeatherLoading();
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            throw new Error('Invalid API key. Please check your OpenWeatherMap API key.');
+                        }
+                        throw new Error('Failed to fetch weather data');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayWeather(data);
+                })
+                .catch(error => {
+                    showWeatherError(error.message);
+                });
+        }
+        
+        function displayWeather(data) {
+            weatherLoading.style.display = 'none';
+            weatherError.style.display = 'none';
+            weatherContent.style.display = 'block';
+            
+            weatherEmoji.textContent = getWeatherEmoji(data.weather[0].main);
+            weatherLocation.textContent = `${data.name}, ${data.sys.country}`;
+            weatherTemp.textContent = `${Math.round(data.main.temp)}°C`;
+            weatherHumidity.textContent = `Humidity: ${data.main.humidity}%`;
+        }
+        
+        function showWeatherLoading() {
+            weatherLoading.style.display = 'block';
+            weatherContent.style.display = 'none';
+            weatherError.style.display = 'none';
+        }
+        
+        function showWeatherError(message) {
+            weatherLoading.style.display = 'none';
+            weatherContent.style.display = 'none';
+            weatherError.style.display = 'block';
+            weatherError.textContent = message;
+        }
+        
+        function detectLocation() {
+            if (!navigator.geolocation) {
+                showWeatherError('Geolocation is not supported by your browser');
+                return;
+            }
+            
+            showWeatherLoading();
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    fetchWeatherByCoords(position.coords.latitude, position.coords.longitude);
+                },
+                (error) => {
+                    showWeatherError('Unable to detect your location. Please enter a city name instead.');
+                }
+            );
+        }
+        
+        function saveApiKey() {
+            const key = apiKeyInput.value.trim();
+            if (key) {
+                localStorage.setItem('openweather_api_key', key);
+                alert('API key saved!');
+            }
+        }
+        
+        // Weather event listeners
+        searchCityBtn.addEventListener('click', () => {
+            const city = cityInput.value.trim();
+            if (city) {
+                fetchWeatherByCity(city);
+            }
+        });
+        
+        cityInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const city = cityInput.value.trim();
+                if (city) {
+                    fetchWeatherByCity(city);
+                }
+            }
+        });
+        
+        detectLocationBtn.addEventListener('click', detectLocation);
+        saveApiKeyBtn.addEventListener('click', saveApiKey);
+        
+        // Auto-detect location on page load if API key exists
+        if (apiKey) {
+            detectLocation();
+        }
+
+        // Task event listeners
+        addTaskBtn.addEventListener('click', addTask);
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+
+        // Initial render
+        renderTasks();
+    </script>
+</body>
+</html>
