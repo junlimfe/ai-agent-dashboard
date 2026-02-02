@@ -1,0 +1,16 @@
+# Exported from Render on 2026-02-02T17:07:45Z
+version: "1"
+projects:
+- name: My project
+  environments:
+  - name: Production
+    services:
+    - type: web
+      name: ai-agent-dashboard
+      runtime: node
+      repo: https://github.com/junlimfe/ai-agent-dashboard
+      plan: free
+      region: oregon
+      buildCommand: yarn
+      startCommand: yarn start
+      autoDeployTrigger: commit
